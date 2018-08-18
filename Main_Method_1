@@ -85,7 +85,7 @@ P_W[0:,] = v
 P_W[2:,] = P_W1_direction
 P_W1 = tf.Variable(P_W, dtype=tf.float32)
 
-print(P_W)
+#print(P_W)
 
 
 P_b1 =  sess.run('P_b1:0')
@@ -143,7 +143,7 @@ phi_true = tf.transpose(tf.reshape(P_output,[batch_size,nn]))
 
 
 global_step=tf.Variable(0,trainable=False)
-starter_learning_rate=0.0005
+starter_learning_rate=0.005
 learning_rate=tf.train.exponential_decay(starter_learning_rate,global_step,500,1.00,staircase=True)
 y_output=tf.placeholder(tf.float32, shape=([nn, batch_size]))
 recon_loss = tf.reduce_sum((phi_true-y_output)**2)
@@ -182,16 +182,18 @@ Y_test = sio.loadmat('{}/phi_true_test2.mat'.format(directory_data))['phi_true_t
 budget=0
 final_error=float('inf')
 terminate_criteria=100
-
+starting_loss = 1000
+decay_rate = 100
 # one-shot algorithm
 while final_error>terminate_criteria:
     print("requirement doesn't match, current final_error={}, keep sampling".format(final_error))
     try:
         add_point_index=sio.loadmat('{}/add_point_index_1D.mat'.format(directory_result))['add_point_index'][0]
         index_ind=list(add_point_index)+index_ind
+        global_step_loss = len(index_ind)
     except:
         pass
-
+    loss_list = []
     Y_train = sio.loadmat('{}/phi_true_train.mat'.format(directory_data))['phi_true_train']
 
     F_batch = np.zeros([len(LHS), z_dim])
@@ -199,22 +201,31 @@ while final_error>terminate_criteria:
         F_batch[i,0]=LHS_x[i]
         F_batch[i,1]=LHS_y[i]
         F_batch[i,2]=LHS_z[i]
-
     for it in range(100000):
         random_ind=np.random.choice(index_ind,batch_size,replace=False)
 
         _,error=sess.run([solver, recon_loss],feed_dict={y_output:Y_train[random_ind].T,F_input:F_batch[random_ind]})
-        if it%10 == 0:
+        if len(index_ind)%100 == 0: # plot loss curve
+            loss_list.append(error)
+        if it%100 == 0:
             print('iteration:{}, recon_loss:{}'.format(it,error))
-        if error <= 1:
+        #if error <= 1 : # try exponential decay
+        if error <= starting_loss*np.exp(-global_step_loss/decay_rate+1) or error<=1:
+            print('loss threshold is: {}'.format(starting_loss*np.exp(-global_step_loss/decay_rate+1)))
             if not os.path.exists(directory_model):
                 os.makedirs(directory_model)
             saver=tf.train.Saver()
             saver.save(sess, '{}/model_sample_{}'.format(directory_model_3D,len(index_ind)))
             print('converges, saving the model.....')
-            print('number of data used is:{}'.format(len(index_ind)))
             break
-
+    print('number of data used is:{}'.format(len(index_ind)-1))
+    try:
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.plot(loss_list)
+        plt.savefig('{}/loss_curve_{}.png'.format('loss_curve/',len(index_ind)))
+    except:
+        pass
     # random generation
     candidate_pool=list(set(list(np.int32(np.linspace(0,len(Y_train)-1,len(Y_train)))))-set(index_ind))
     random_candidate=np.random.choice(candidate_pool, 100 ,replace=False)
@@ -236,8 +247,10 @@ while final_error>terminate_criteria:
                                                                     F_input:F_batch[it%ratio*batch_size:it%ratio*batch_size+batch_size]})
         final_error=final_error + final_error_temp
     final_error=final_error/testing_num
+    print('average testing error is: {}'.format(final_error))
     if final_error<=terminate_criteria:
-        saver.save(sess, '{}/model_1D_sample_{}'.format(directory_model_3D_final))
+        saver.save(sess, 'Final_3D/model_3D_final')
+        print('Exiting. Saving the final model.....')
         break
 
 

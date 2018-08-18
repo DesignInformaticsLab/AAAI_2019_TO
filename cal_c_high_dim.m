@@ -214,7 +214,7 @@ dc_dphi=dc_dphi';
 mu_check=full(sum((dc_dphi*(1-dg_dphi'*(dg_dphi*dg_dphi'+eye(1)*1e-12)^(-1)*dg_dphi)).^2));
 mu_store(iii,:)=mu_check;   
 rho_store(iii,:)=rho(:);
-fprintf('evaluating sample %s',i)
+fprintf('evaluating sample %d \n',iii)
 end
 
 [B,I]=sort(mu_store,'descend');
