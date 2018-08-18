@@ -144,7 +144,7 @@ phi_true = tf.transpose(tf.reshape(P_output,[batch_size,nn]))
 
 global_step=tf.Variable(0,trainable=False)
 starter_learning_rate=0.005
-learning_rate=tf.train.exponential_decay(starter_learning_rate,global_step,500,1.00,staircase=True)
+learning_rate=tf.train.exponential_decay(starter_learning_rate,global_step,500,0.98,staircase=True)
 y_output=tf.placeholder(tf.float32, shape=([nn, batch_size]))
 recon_loss = tf.reduce_sum((phi_true-y_output)**2)
 solver = tf.train.AdamOptimizer(learning_rate).minimize(recon_loss,global_step)
@@ -183,19 +183,19 @@ budget=0
 final_error=float('inf')
 terminate_criteria=100
 starting_loss = 1000
-decay_rate = 100
+decay_rate = 0.96
 # one-shot algorithm
 while final_error>terminate_criteria:
     print("requirement doesn't match, current final_error={}, keep sampling".format(final_error))
     try:
         add_point_index=sio.loadmat('{}/add_point_index_1D.mat'.format(directory_result))['add_point_index'][0]
         index_ind=list(add_point_index)+index_ind
-        global_step_loss = len(index_ind)
     except:
         pass
     loss_list = []
+    global_step_loss = len(index_ind)-100
+    decay_loss = starting_loss * decay_rate**global_step_loss
     Y_train = sio.loadmat('{}/phi_true_train.mat'.format(directory_data))['phi_true_train']
-
     F_batch = np.zeros([len(LHS), z_dim])
     for i in range(len(LHS)):
         F_batch[i,0]=LHS_x[i]
@@ -210,8 +210,8 @@ while final_error>terminate_criteria:
         if it%100 == 0:
             print('iteration:{}, recon_loss:{}'.format(it,error))
         #if error <= 1 : # try exponential decay
-        if error <= starting_loss*np.exp(-global_step_loss/decay_rate+1) or error<=1:
-            print('loss threshold is: {}'.format(starting_loss*np.exp(-global_step_loss/decay_rate+1)))
+        if error <= decay_loss or error<=1:
+            print('loss threshold is: {}'.format(decay_loss))
             if not os.path.exists(directory_model):
                 os.makedirs(directory_model)
             saver=tf.train.Saver()
@@ -219,13 +219,10 @@ while final_error>terminate_criteria:
             print('converges, saving the model.....')
             break
     print('number of data used is:{}'.format(len(index_ind)-1))
-    try:
-        plt.xlabel('iteration')
-        plt.ylabel('loss')
-        plt.plot(loss_list)
-        plt.savefig('{}/loss_curve_{}.png'.format('loss_curve/',len(index_ind)))
-    except:
-        pass
+    # plt.xlabel('iteration')
+    # plt.ylabel('loss')
+    # fig = plt.plot(loss_list)
+    # fig.figure.savefig('{}/loss_curve_{}.png'.format('loss_curve',len(index_ind)))
     # random generation
     candidate_pool=list(set(list(np.int32(np.linspace(0,len(Y_train)-1,len(Y_train)))))-set(index_ind))
     random_candidate=np.random.choice(candidate_pool, 100 ,replace=False)
