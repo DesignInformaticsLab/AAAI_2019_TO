@@ -1,0 +1,3 @@
+model_checkpoint_path: "model_1D_final"
+all_model_checkpoint_paths: "../model_save/model_1D_sample_15"
+all_model_checkpoint_paths: "model_1D_final"

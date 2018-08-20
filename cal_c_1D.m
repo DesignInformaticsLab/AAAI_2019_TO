@@ -188,6 +188,9 @@ phi_til = H*phi(:)./Hs;
 rho = (tanh(beta/2)+tanh(beta*(phi_til-0.5)))/(2*tanh(beta/2));
 %     rho=double(reshape(rho_test(iii,:),[nn,1]));
 
+xPhys_true(iii,:,:)=reshape(rho,[nely,nelx]);
+%figure,colormap(gray); imagesc(1-reshape(rho,[nely,nelx])); caxis([0 1]); axis equal; axis off; drawnow;
+
 sK = reshape(KE(:)*(Emin+rho(:)'.^gamma*(E0-Emin)),64*nelx*nely,1);
 K = sparse(iK,jK,sK); K = (K+K')/2; 
 U(freedofs) = K(freedofs,freedofs)\F(freedofs);
@@ -213,6 +216,8 @@ mu_store(iii,:)=mu_check;
 
 g_store(iii,:)=g;
 global_density_store(iii,:)=global_density;
+
+
 fprintf('evaluating sample %d \n',iii)
 end
 
