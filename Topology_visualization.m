@@ -1,56 +1,52 @@
 %% This code follows the Sigmund 2018 infill bone paper
 clear;close all;
 % addpath('./fminsdp/');
-load('experiment_result/phi_gen_1D.mat')
-load('experiment_result/random_candidate_1D.mat')
+load('experiment_data/LHS_test2.mat')
+load('Trial_2/phi_gen_test_input.mat');
+random_candidate = 0:149;
+phi_gen = phi_gen_test_input;
+random_candidate=random_candidate+1; % python to matlab
 %% Input
-nelx=12*10; % horizontal length
-nely=4*10; % vertical length
+ratio=10;
+nelx=12*ratio; % horizontal length
+nely=4*ratio; % vertical length
 alpha =0.6; % lobal volume fraction
 alpha2=0.6; % global volume fraction
 gamma=3.0; % material binarization
 rmin=3.0; % filter radius
 density_r = 6.0; % density radius
 
-batch_size=100;
-xPhys_true = zeros(batch_size,nely,nelx);
+batch_size=10;
+LHS_rand=LHS_test(random_candidate,:);
+
+xPhys_true = zeros(100,nely,nelx);
 % phi_true = zeros(batch_size,nely,nelx);
+% c_store= zeros(batch_size,1);
 c_our_final=zeros(batch_size,1);
 mu_store=zeros(batch_size,1);
-global_density_store=zeros(batch_size,1);
-g_store=zeros(batch_size,1);
+rho_store=zeros(batch_size,4800);
 
 for iii = 1:1:batch_size
     
-    
+count=0;
 force=-1;
 
-% theta=2*(i)*pi/10; %+(i-1)*pi/9*(ii-1)/10;
-theta = linspace(0,pi,batch_size);
-Fx=force*sin(theta(iii));
-Fy=force*cos(theta(iii));
+% random force location in right range
+F = sparse(2*(nely+1)*(nelx+1),1);
 
-F = sparse((nely+1)*2*nelx+nely+2,1,Fy, 2*(nely+1)*(nelx+1),1);
-F((nely+1)*2*nelx+nely+2-1,1)= Fx;
-
-% bot y direction
-
-% for i = 2:(nelx+1)
-% %     force=-rand;
-% %     force_store(count_f,iii)=force;
-%     F((nely+1)*2*i-1,1)=0;
-%     F((nely+1)*2*i,1)  =force_store(i-1,iii);
-% %     count_f=count_f+1;
-% end
-
-
-
+%% LHS
+point_rand = ((nely+1)*(LHS_rand(iii,1)-1)+LHS_rand(iii,2))*2;
+theta_rand=LHS_rand(iii,3);
+Fx=force*sin(theta_rand);
+Fy=force*cos(theta_rand);
+F(point_rand-1,1)= Fx;
+F(point_rand,1)= Fy;
 
 %% Algorithm parameters
 p = 16; 
-beta=10.0; 
+beta=8.0; 
 nn = nelx*nely;
-epsilon_al=1;
+epsilon_al=1e-3;
 epsilon_opt=1e-3;
 
 % PREPARE FILTER
@@ -80,6 +76,7 @@ end
 % idy = M_t(~isnan(M_t));
 % idx(isnan(M_t))=[];
 % bigM = sparse(idx,idy,1);
+
 iH = ones(nelx*nely*(2*(ceil(rmin)-1)+1)^2,1);
 jH = ones(size(iH));
 sH = zeros(size(iH));
@@ -135,6 +132,14 @@ N_count = sum(~isnan(N),2);
 E0 = 1;
 Emin = 1e-9;
 nu = 0.3;
+% xPhys_true(iii,:,:)=reshape(rho,[nely,nelx]);
+% phi_true(iii,:,:)=reshape(phi,[nely,nelx]);
+% c_store(iii,:)=c;
+% figure,colormap(gray); imagesc(1-reshape(rho,[nely,nelx])); caxis([0 1]); axis equal; axis off; drawnow;
+% fprintf(' It.:%5i Obj.:%11.4f g:%7.3f eta:%7.3f r:%7.3f ch.:%7.3f\n',count, c, g, eta, log(r), max(abs(full(dphi))));
+% saveas(gcf,sprintf('FIG_show_%d.png',iii));
+% close(1)
+% count_store(iii,:)=count;
 
 %% PREPARE FINITE ELEMENT ANALYSIS
 A11 = [12  3 -6 -3;  3 12  3  0; -6  3 12 -3; -3  0 -3 12];
@@ -160,36 +165,37 @@ freedofs = setdiff(alldofs,fixeddofs);
 dphi_idphi = bsxfun(@rdivide,H,sum(H));
 
 %% START ITERATION
-% phi = alpha*ones(nn,1);
-% phi = double(reshape(phi_gen(1,:),[nn,1]));
 loop = 0;
-delta = 1.0;
+
 phi = reshape(double(phi_gen(iii,:)),[nn,1]);
 
-beta = 640;
-% while beta < 1000
+r = 1;
+r2 = 0.001;
+
 loop=loop+1;
 % for iii = 1:1   
 %     loop = loop + 1;
 loop2 = 0;
 %augmented lagrangian parameters
-r = 1;
-r2 = 0.001;
+r = r*2;
+r2 = r2*2;
 lambda = 0;
 lambda2 = 0;
 eta = 0.1;
 eta2 = 0.1;
-epsilon = 1;
-dphi = 1e6;
+epsilon = 1e-3;
+learning_rate = 0.1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%%%%%%%%% Get initial g and c %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 phi_til = H*phi(:)./Hs;  
 rho = (tanh(beta/2)+tanh(beta*(phi_til-0.5)))/(2*tanh(beta/2));
 %     rho=double(reshape(rho_test(iii,:),[nn,1]));
 
+
 xPhys_true(iii,:,:)=reshape(rho,[nely,nelx]);
-%figure,colormap(gray); imagesc(1-reshape(rho,[nely,nelx])); caxis([0 1]); axis equal; axis off; drawnow;
+figure,colormap(gray); imagesc(1-reshape(rho,[nely,nelx])); caxis([0 1]); axis equal; axis off; drawnow;
+
 
 sK = reshape(KE(:)*(Emin+rho(:)'.^gamma*(E0-Emin)),64*nelx*nely,1);
 K = sparse(iK,jK,sK); K = (K+K')/2; 
@@ -197,31 +203,26 @@ U(freedofs) = K(freedofs,freedofs)\F(freedofs);
 ce = sum((U(edofMat)*KE).*U(edofMat),2);
 c = sum(sum((Emin+rho(:).^gamma*(E0-Emin)).*ce));  
 c_our_final(iii,:)=c;
-
 rho_bar = bigN*rho./N_count;
 g = (sum(rho_bar.^p)/nely/nelx)^(1/p)/alpha - 1.0;
 global_density = rho'*ones(nn,1)/nn-alpha2;
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dc_drho = -gamma*rho.^(gamma-1)*(E0-Emin).*ce(:); 
 drho_dphi = beta*(1-tanh(beta*(phi(:)-0.5)).^2)/2/tanh(beta/2);
 dc_dphi = sum(bigM.*bsxfun(@times, dphi_idphi, (dc_drho.*drho_dphi)'),2);
 dg_drhobar = 1/alpha/nn*(1/nn*sum(rho_bar.^p)).^(1/p-1).*rho_bar.^(p-1);
 dg_dphi = sum(bigM.*bsxfun(@times, dphi_idphi, (bigN*(dg_drhobar./N_count).*drho_dphi)'),2);
 
+    
 dg_dphi=dg_dphi';
 dc_dphi=dc_dphi';
 
 mu_check=full(sum((dc_dphi*(1-dg_dphi'*(dg_dphi*dg_dphi'+eye(1)*1e-12)^(-1)*dg_dphi)).^2));
-mu_store(iii,:)=mu_check;
-
-g_store(iii,:)=g;
-global_density_store(iii,:)=global_density;
-
-
+mu_store(iii,:)=mu_check;   
+rho_store(iii,:)=rho(:);
 fprintf('evaluating sample %d \n',iii)
 end
-
+save(sprintf('experiment_result/c_test.mat'),'c_our_final');
 [B,I]=sort(mu_store,'descend');
-add_point_index=I(1)-1;
-save(sprintf('experiment_result/add_point_index_1D.mat'),'add_point_index');
-% clear
+add_point_index=random_candidate(I(1))-1; % matlab to python
+save(sprintf('experiment_result/add_point_index.mat'),'add_point_index');

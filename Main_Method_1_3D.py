@@ -178,22 +178,24 @@ else:
     eng.infill_high_dim(1,nargout=0)
 
 Y_test = sio.loadmat('{}/phi_true_test2.mat'.format(directory_data))['phi_true_test'] # prepared off-line
-
+test_load = sio.loadmat('{}/LHS_test2.mat'.format(directory_data))['LHS_test']  # prepared off-line
 budget=0
 final_error=float('inf')
 terminate_criteria=10
+terminate_step = 4000
 starting_loss = 100
 decay_rate = 0.98 # too small will result in overfitting
 # one-shot algorithm
-while final_error>terminate_criteria:
+while len(index_ind) <= terminate_step:
     print("requirement doesn't match, current final_error={}, keep sampling".format(final_error))
     try:
-        add_point_index=sio.loadmat('{}/add_point_index_1D.mat'.format(directory_result))['add_point_index'][0]
+        add_point_index=sio.loadmat('{}/add_point_index.mat'.format(directory_result))['add_point_index'][0]
         index_ind=list(add_point_index)+index_ind
     except:
+        print("add_point_index bug")
         pass
     loss_list = []
-    global_step_loss = len(index_ind)-101
+    global_step_loss = len(index_ind)-initial_num
     decay_loss = starting_loss * decay_rate**global_step_loss
     Y_train = sio.loadmat('{}/phi_true_train.mat'.format(directory_data))['phi_true_train']
     F_batch = np.zeros([len(LHS), z_dim])
@@ -208,7 +210,7 @@ while final_error>terminate_criteria:
         if len(index_ind)%100 == 0: # plot loss curve
             loss_list.append(error)
         if it%100 == 0:
-            print('iteration:{}, recon_loss:{}'.format(it,error))
+            print('iteration:{}, recon_loss:{}, number of data used is:{}'.format(it,error,(len(index_ind))))
         #if error <= 1 : # try exponential decay
         if error <= decay_loss or error<=1:
             print('loss threshold is: {}'.format(decay_loss))
@@ -218,7 +220,7 @@ while final_error>terminate_criteria:
             saver.save(sess, '{}/model_sample_{}'.format(directory_model_3D,len(index_ind)))
             print('converges, saving the model.....')
             break
-    print('number of data used is:{}'.format(len(index_ind)-1))
+    print('number of data used is:{}'.format(len(index_ind)))
     # plt.xlabel('iteration')
     # plt.ylabel('loss')
     # fig = plt.plot(loss_list)
@@ -241,11 +243,12 @@ while final_error>terminate_criteria:
     final_error=0
     for it in range(ratio):
         _,final_error_temp=sess.run([solver, recon_loss],feed_dict={y_output:Y_test[it%ratio*batch_size:it%ratio*batch_size+batch_size].T,
-                                                                    F_input:F_batch[it%ratio*batch_size:it%ratio*batch_size+batch_size]})
+                                                                    F_input:test_load[it%ratio*batch_size:it%ratio*batch_size+batch_size]})
         final_error=final_error + final_error_temp
-    final_error=final_error/testing_num
+    final_error=final_error/testing_num * batch_size
     print('average testing error is: {}'.format(final_error))
-    if final_error<=terminate_criteria:
+
+    if len(index_ind) == terminate_step:
         saver.save(sess, 'Final_3D/model_3D_final')
         print('Exiting. Saving the final model.....')
         break
@@ -270,12 +273,33 @@ while final_error>terminate_criteria:
     if not os.path.exists(directory_result):
         os.makedirs(directory_result)
     phi_gen=np.concatenate(phi_store,axis=1).T
-    sio.savemat('{}/phi_gen.mat'.format(directory_result),{'phi_gen':phi_gen})
-    sio.savemat('{}/random_candidate.mat'.format(directory_result),{'random_candidate':random_candidate})
 
-    # evaluate the random samples and pick the worst one
-    eng = matlab.engine.start_matlab()
-    eng.cal_c_high_dim(nargout=0)
+
+    Save_folder = 'Trial_2/'
+
+    if not os.path.exists(Save_folder):
+        os.makedirs(Save_folder)
+    sio.savemat('{}/phi_gen.mat'.format(Save_folder),{'phi_gen':phi_gen})
+    sio.savemat('{}/random_candidate.mat'.format(Save_folder),{'random_candidate':random_candidate})
+
+
+    # generate topology from test load.
+    rho_gen_1 = []
+    phi_store_1 = []
+    for it in range(ratio):
+        phi_update_1 = sess.run(phi_true, feed_dict={
+            F_input: test_load[it % ratio * batch_size:it % ratio * batch_size + batch_size]})
+        phi_store_1.append(phi_update_1)
+
+    if not os.path.exists(directory_result):
+        os.makedirs(directory_result)
+    phi_gen_1 = np.concatenate(phi_store_1, axis=1).T
+
+    sio.savemat('{}/phi_gen_test_input.mat'.format(Save_folder), {'phi_gen_test_input': phi_gen_1})
+
+    if len(index_ind) % 500 == 0:
+        sio.savemat('{}/phi_gen_test_input_{}.mat'.format(Save_folder,len(index_ind)), {'phi_gen_test_input': phi_gen_1})
+
 
     if Prepared_training_sample==False:
         budget=np.sum(sio.loadmat('{}/budget_store.mat')['budget_store'].reshape([-1]))+budget+100
@@ -284,5 +308,11 @@ while final_error>terminate_criteria:
     if Prepared_training_sample == False:
         eng = matlab.engine.start_matlab()
         eng.infill_high_dim(0,nargout=0)
+
+    # evaluate the random samples and pick the worst one
+    eng = matlab.engine.start_matlab()
+    eng.cal_c_high_dim(nargout=0)
+
+
 
 sess.close()

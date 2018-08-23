@@ -85,7 +85,7 @@ P_W1_direction = sess.run('P_W1:0')
 # P_W[2:,] = P_W1_direction
 P_W1 = tf.Variable(P_W1_direction, dtype=tf.float32)
 
-#print(P_W)
+print(P_W1_direction)
 
 
 P_b1 =  sess.run('P_b1:0')
@@ -201,12 +201,12 @@ decay_rate = 0.96 # too small will result in overfitting
 while final_error>terminate_criteria:
     print("requirement doesn't match, current final_error={}, keep sampling".format(final_error))
     try:
-        add_point_index=sio.loadmat('{}/add_point_index_1D.mat'.format(directory_result))['add_point_index'][0]
+        add_point_index=sio.loadmat('{}/add_point_index.mat'.format(directory_result))['add_point_index'][0]
         index_ind=list(add_point_index)+index_ind
     except:
         pass
     loss_list = []
-    global_step_loss = len(index_ind)-101
+    global_step_loss = len(index_ind)-100
     decay_loss = starting_loss * decay_rate**global_step_loss
     Y_train = sio.loadmat('{}/phi_true_train.mat'.format(directory_data))['phi_true_train']
     F_batch = np.zeros([len(LHS), z_dim])
@@ -223,7 +223,7 @@ while final_error>terminate_criteria:
         if it%100 == 0:
             print('iteration:{}, recon_loss:{}'.format(it,error))
         #if error <= 1 : # try exponential decay
-        if error <= decay_loss or error<=1:
+        if error <= decay_loss or error<=0.05:
             print('loss threshold is: {}'.format(decay_loss))
             if not os.path.exists(directory_model):
                 os.makedirs(directory_model)
@@ -231,7 +231,7 @@ while final_error>terminate_criteria:
             saver.save(sess, '{}/model_sample_{}'.format(directory_model_3D,len(index_ind)))
             print('converges, saving the model.....')
             break
-    print('number of data used is:{}'.format(len(index_ind)-1))
+    print('number of data used is:{}'.format(len(index_ind)))
     # plt.xlabel('iteration')
     # plt.ylabel('loss')
     # fig = plt.plot(loss_list)
@@ -256,7 +256,7 @@ while final_error>terminate_criteria:
         _,final_error_temp=sess.run([solver, recon_loss],feed_dict={y_output:Y_test[it%ratio*batch_size:it%ratio*batch_size+batch_size].T,
                                                                     F_input:F_batch[it%ratio*batch_size:it%ratio*batch_size+batch_size]})
         final_error=final_error + final_error_temp
-    final_error=final_error/testing_num
+    final_error=final_error/testing_num*batch_size
     print('average testing error is: {}'.format(final_error))
     if final_error<=terminate_criteria:
         saver.save(sess, 'Final_3D/model_3D_final')
