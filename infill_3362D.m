@@ -1,7 +1,13 @@
 
 initial = 100;
-fprintf('start solving the TO problem, intial is %d......\n',initial)
+LHS_3362_train = zeros(100,9922);
 
+for i = 1:100
+    LHS_3362_train(i,6561:9922) = 2*rand(1,3362)-1;
+end
+
+fprintf('start solving the TO problem, intial is %d......\n',initial)
+save(sprintf('%s/LHS_3362_train_2.mat',fname1),'LHS_3362_train_2');
 %% Input
 ratio=10;
 nelx=12*ratio; % horizontal length
@@ -13,7 +19,7 @@ rmin=3.0; % filter radius
 density_r = 6.0; % density radius
 
 
-load('experiment_data/LHS_3362_train_1.mat');
+%load('experiment_data/LHS_3362_train_2.mat');
 % LHS=LHS.LHS_train;
 % if initial~=1
 %     index=load('experiment_result/random_candidate.mat')+1; % python to matlab
@@ -334,6 +340,6 @@ for index_LHS = 1:batch_size
     phi_true_train(index_LHS,:) = phi_true_reshape;
 end
 save(sprintf('%s/budget_store.mat',fname1),'budget_store');
-save(sprintf('%s/phi_true_train_3362_1.mat',fname1),'phi_true_train');
+save(sprintf('%s/phi_true_train_3362_2.mat',fname1),'phi_true_train');
 % save(sprintf('%s/xPhys_true.mat',fname1),'xPhys_true');
 % save(sprintf('%s/c_store.mat',fname1),'c_store');
