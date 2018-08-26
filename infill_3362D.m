@@ -6,8 +6,9 @@ for i = 1:100
     LHS_3362_train(i,6561:9922) = 2*rand(1,3362)-1;
 end
 
+fname1='experiment_data';
 fprintf('start solving the TO problem, intial is %d......\n',initial)
-save(sprintf('%s/LHS_3362_train_2.mat',fname1),'LHS_3362_train_2');
+save(sprintf('%s/LHS_3362_train_2.mat',fname1),'LHS_3362_train');
 %% Input
 ratio=10;
 nelx=12*ratio; % horizontal length
