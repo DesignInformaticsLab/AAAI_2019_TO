@@ -48,7 +48,7 @@ initial_num=5
 Prepared_training_sample = True # True if samples are pre-solved offline
 
 # network parameter
-z_dim = 1
+z_dim = 2*41*41
 width = nely
 height = nelx
 h_dim = width/8*height/8
@@ -137,25 +137,25 @@ force=-1
 F_batch= np.zeros([100, z_dim])
 
 for i in range(100):
-    # Fx = force * np.sin(theta[i])
-    # Fy = force * np.cos(theta[i])
-    #
-    # F_batch[i, 0] = Fx
-    # F_batch[i, 1] = Fy
-    F_batch[i,:]=theta[i]
+    Fx = force * np.sin(theta[i])
+    Fy = force * np.cos(theta[i])
+    F_batch[i,2*((nely+1)*40+19+1)-1]=Fy
+    F_batch[i,2*((nely+1)*40+19+1)-2]=Fx
+    #F_batch[i,:]=theta[i]
 
 budget=0
 final_error=float('inf')
 terminate_criteria=1 # can be adjusted
 testing_num = 100
 
-while final_error>terminate_criteria:
+#while final_error>terminate_criteria:
+while len(index_ind) <= 15:
     print("requirement doesn't match, current final_error={}, keep sampling".format(final_error))
-    #try:
-    add_point_index=sio.loadmat('{}/add_point_index_1D.mat'.format(directory_result))['add_point_index'][0]
-    index_ind=list(add_point_index)+index_ind
-    #except:
-    #    pass
+    try:
+        add_point_index=sio.loadmat('{}/add_point_index_1D.mat'.format(directory_result))['add_point_index'][0]
+        index_ind=list(add_point_index)+index_ind
+    except:
+        pass
 
     Y_train = sio.loadmat('{}/phi_true_1D.mat'.format(directory_data))['phi_true']
 
@@ -185,12 +185,10 @@ while final_error>terminate_criteria:
         final_error_temp=sess.run(recon_loss,feed_dict={y_output:Y_test[it%ratio*batch_size:it%ratio*batch_size+batch_size].T,
                                                                     F_input:F_batch[it%ratio*batch_size:it%ratio*batch_size+batch_size]})
         final_error=final_error + final_error_temp
-    final_error=final_error/testing_num
-    # print('average testing error is: {}'.format(final_error))
-    # _,final_error=sess.run([solver, recon_loss],feed_dict={y_output:Y_test[random.sample(range(0,len(Y_test)),batch_size)].T,F_input:F_batch[random_ind]})
+        final_error = final_error/testing_num
     print('average testing error is: {}'.format(final_error))
 
-    if final_error<=terminate_criteria:
+    if len(index_ind) == 15:
         saver.save(sess, 'Final_1D/model_1D_final')
         print('Exiting. Saving the final model.....')
         break
@@ -198,13 +196,13 @@ while final_error>terminate_criteria:
     F_batch_test= np.zeros([testing_num, z_dim])
 
     for i in range(testing_num):
-        # Fx = force * np.sin(theta[i])
-        # Fy = force * np.cos(theta[i])
-        #
-        # # up-right corner
-        # F_batch_test[i, 0] = Fx
-        # F_batch_test[i, 1] = Fy
-        F_batch_test[i,:]=theta[i]
+        Fx = force * np.sin(theta[i])
+        Fy = force * np.cos(theta[i])
+
+        # up-right corner
+        F_batch_test[i, 0] = Fx
+        F_batch_test[i, 1] = Fy
+        #F_batch_test[i,:]=theta[i]
 
     # evaluate all points (total 100)
     ratio=testing_num/batch_size
