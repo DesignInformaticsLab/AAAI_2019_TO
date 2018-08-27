@@ -182,11 +182,12 @@ else:
 Y_test = sio.loadmat('{}/phi_true_test2.mat'.format(directory_data))['phi_true_test'] # prepared off-line
 test_load = sio.loadmat('{}/LHS_test2.mat'.format(directory_data))['LHS_test']  # prepared off-line
 budget=0
+error_progress = []
 final_error=float('inf')
 terminate_criteria=10
-terminate_step = 4000
+terminate_step = 450
 starting_loss = 100
-decay_rate = 0.98 # too small will result in overfitting
+decay_rate = 0.6 # too small will result in overfitting
 # one-shot algorithm
 while len(index_ind) <= terminate_step:
     print("requirement doesn't match, current final_error={}, keep sampling".format(final_error))
@@ -231,11 +232,7 @@ while len(index_ind) <= terminate_step:
             print('converges, saving the model.....')
             break
     print('number of data used is:{}'.format(len(index_ind)))
-    # plt.xlabel('iteration')
-    # plt.ylabel('loss')
-    # fig = plt.plot(loss_list)
-    # fig.figure.savefig('{}/loss_curve_{}.png'.format('loss_curve',len(index_ind)))
-    # random generation
+
     candidate_pool=list(set(list(np.int32(np.linspace(0,len(Y_train)-1,len(Y_train)))))-set(index_ind))
     random_candidate=np.random.choice(candidate_pool, 100 ,replace=False)
     LHS_candidate = sio.loadmat('{}/LHS_train.mat'.format(directory_data))['LHS_train'][random_candidate]
@@ -253,7 +250,8 @@ while len(index_ind) <= terminate_step:
         Fy = force * np.cos(LHS_z[i])
         F_batch_candidate[i,2*((nely+1)*LHS_x[i]+LHS_y[i]+1)-1]=Fy
         F_batch_candidate[i,2*((nely+1)*LHS_x[i]+LHS_y[i]+1)-2]=Fx
-    #testing_num = len(LHS_candidate)
+
+
     testing_num = 100
     # generate topology from test load.
     rho_gen_1 = []
@@ -279,13 +277,7 @@ while len(index_ind) <= terminate_step:
         print('Exiting. Saving the final model.....')
         break
 
-
-
-    # error_store=[]
-    # for i in range(len(LHS_candidate)):
-    #     F_batch_candidate[i,0]=LHS_x_candidate[i]
-    #     F_batch_candidate[i,1]=LHS_y_candidate[i]
-    #     F_batch_candidate[i,2]=LHS_z_candidate[i]
+    error_progress.append(final_error)
 
     rho_gen=[]
     phi_store=[]
@@ -299,13 +291,17 @@ while len(index_ind) <= terminate_step:
     phi_gen=np.concatenate(phi_store,axis=1).T
 
 
-    Save_folder = 'Trial_2D_2D/'
+    ########### Change for each run goes here
+    Save_folder = 'Trial_1/'
+    trial_num = 1 #can only contain numbers
+    ###########
+
 
     if not os.path.exists(Save_folder):
         os.makedirs(Save_folder)
     sio.savemat('{}/phi_gen.mat'.format(Save_folder),{'phi_gen':phi_gen})
     sio.savemat('{}/random_candidate.mat'.format(Save_folder),{'random_candidate':random_candidate})
-
+    sio.savemat('{}/error_progress.mat'.format(Save_folder),{'error_progress':error_progress})
 
     for it in range(ratio):
         phi_update_1 = sess.run(phi_true, feed_dict={
@@ -318,9 +314,10 @@ while len(index_ind) <= terminate_step:
 
     sio.savemat('{}/phi_gen_test_input.mat'.format(Save_folder), {'phi_gen_test_input': phi_gen_1})
 
-    if len(index_ind) % 500 == 0:
+    if len(index_ind) % 50 == 0:
         sio.savemat('{}/phi_gen_test_input_{}.mat'.format(Save_folder,len(index_ind)), {'phi_gen_test_input': phi_gen_1})
-
+        eng = matlab.engine.start_matlab()
+        eng.c_calculator(('{}/phi_gen_test_input_{}.mat'.format(Save_folder,str(len(index_ind)))),trial_num,len(index_ind),nargout=0)
 
     if Prepared_training_sample==False:
         budget=np.sum(sio.loadmat('{}/budget_store.mat')['budget_store'].reshape([-1]))+budget+100
