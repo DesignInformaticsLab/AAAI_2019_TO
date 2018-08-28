@@ -181,13 +181,20 @@ else:
 
 Y_test = sio.loadmat('{}/phi_true_test2.mat'.format(directory_data))['phi_true_test'] # prepared off-line
 test_load = sio.loadmat('{}/LHS_test2.mat'.format(directory_data))['LHS_test']  # prepared off-line
+test_load[:,0] = test_load[:,0]-81
+test_load[:,1] = test_load[:,1]-1
+
+test_load_x=np.int32(test_load[:,0])
+test_load_y=np.int32(test_load[:,1])
+test_load_z=test_load[:,2]
+
 budget=0
 error_progress = []
 final_error=float('inf')
 terminate_criteria=10
-terminate_step = 450
+terminate_step = 451
 starting_loss = 100
-decay_rate = 0.6 # too small will result in overfitting
+decay_rate = 0.6
 # one-shot algorithm
 while len(index_ind) <= terminate_step:
     print("requirement doesn't match, current final_error={}, keep sampling".format(final_error))
@@ -259,10 +266,10 @@ while len(index_ind) <= terminate_step:
     force=-1
     test_load= np.zeros([len(LHS_candidate), z_dim])
     for i in range(len(LHS_candidate)):
-        Fx = force * np.sin(LHS_z[i])
-        Fy = force * np.cos(LHS_z[i])
-        test_load[i,2*((nely+1)*LHS_x[i]+LHS_y[i]+1)-1]=Fy
-        test_load[i,2*((nely+1)*LHS_x[i]+LHS_y[i]+1)-2]=Fx
+        Fx = force * np.sin(test_load_z[i])
+        Fy = force * np.cos(test_load_z[i])
+        test_load[i,2*((nely+1)*test_load_x[i]+test_load_y[i]+1)-1]=Fy
+        test_load[i,2*((nely+1)*test_load_x[i]+test_load_y[i]+1)-2]=Fx
     ratio=testing_num/batch_size
     final_error=0
     for it in range(ratio):
@@ -292,8 +299,8 @@ while len(index_ind) <= terminate_step:
 
 
     ########### Change for each run goes here
-    Save_folder = 'Trial_1/'
-    trial_num = 1 #can only contain numbers
+    Save_folder = 'Trial_100/'
+    trial_num = 100 #can only contain numbers
     ###########
 
 
