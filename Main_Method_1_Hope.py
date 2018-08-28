@@ -47,7 +47,7 @@ class TO_generator():
         weights = vanilla_weights
         weights = pretrained_weights
 
-        h1 = tf.nn.relu(tf.matmul(z, self.P_W1) + self.P_b1)
+        h1 = tf.nn.relu(tf.matmul(z, weights['P_W1']) + weights['P_b1'])
         h1 = tf.reshape(h1, [self.batch_size, self.width / 8, self.height / 8, 1])
         h2_1 = tf.nn.relu(tf.add(tf.nn.conv2d_transpose(h1, weights['deconv2_1_weight'], strides=[1, 1, 1, 1], padding='SAME',
                                            output_shape=[self.batch_size, self.width/8, self.height/8, self.deconv2_1_features]), weights['deconv2_1_bias']))
@@ -92,43 +92,47 @@ class TO_generator():
     def build_model(self):
         self.F_input = tf.placeholder(tf.float32, shape=([self.batch_size, self.z_dim]))
 
-        pretrained_weights = {}
-        P_W1_direction = self.sess.run('P_W1:0')
-        self.P_W1 = tf.Variable(P_W1_direction, dtype=tf.float32)
-        P_b1 =  self.sess.run('P_b1:0')
-        self.P_b1 = tf.Variable(P_b1, dtype = tf.float32)
-        pretrained_weights['deconv2_1_weight'] = tf.Variable(self.sess.run('deconv2_1_weight:0'),dtype = tf.float32)
-        pretrained_weights['deconv2_1_bias'] = tf.Variable(self.sess.run('deconv2_1_bias:0'),dtype = tf.float32)
-        pretrained_weights['deconv2_2_weight'] = tf.Variable(self.sess.run('deconv2_2_weight:0'),dtype = tf.float32)
-        pretrained_weights['deconv2_2_bias'] = tf.Variable(self.sess.run('deconv2_2_bias:0'),dtype = tf.float32)
-        pretrained_weights['deconv3_1_weight'] = tf.Variable(self.sess.run('deconv3_1_weight:0'),dtype = tf.float32)
-        pretrained_weights['deconv3_1_bias'] = tf.Variable(self.sess.run('deconv3_1_bias:0'),dtype = tf.float32)
-        pretrained_weights['deconv3_2_weight'] = tf.Variable(self.sess.run('deconv3_2_weight:0'),dtype = tf.float32)
-        pretrained_weights['deconv3_2_bias'] = tf.Variable(self.sess.run('deconv3_2_bias:0'),dtype = tf.float32)
-        pretrained_weights['deconv4_1_weight'] = tf.Variable(self.sess.run('deconv4_1_weight:0'),dtype = tf.float32)
-        pretrained_weights['deconv4_1_bias'] = tf.Variable(self.sess.run('deconv4_1_bias:0'),dtype = tf.float32)
-        pretrained_weights['deconv4_2_weight'] = tf.Variable(self.sess.run('deconv4_2_weight:0'),dtype = tf.float32)
-        pretrained_weights['deconv4_2_bias'] = tf.Variable(self.sess.run('deconv4_2_bias:0'),dtype = tf.float32)
-        pretrained_weights['deconv5_weight'] = tf.Variable(self.sess.run('deconv5_weight:0'),dtype = tf.float32)
-        pretrained_weights['deconv5_bias'] = tf.Variable(self.sess.run('deconv5_bias:0'),dtype = tf.float32)
-        self.pretrained_weights = pretrained_weights
+        with tf.variable_scope("pretrained", reuse=True):
+            pretrained_weights = {}
+            P_W1_direction = self.sess.run('P_W1:0')
+            P_b1 =  self.sess.run('P_b1:0')
+            pretrained_weights['P_W1'] = tf.Variable(P_W1_direction, dtype=tf.float32, name = 'P_W1')
+            pretrained_weights['P_b1'] = tf.Variable(P_b1, dtype = tf.float32, name = 'P_b1')
+            pretrained_weights['deconv2_1_weight'] = tf.Variable(self.sess.run('deconv2_1_weight:0'),dtype = tf.float32, name='deconv2_1_weight')
+            pretrained_weights['deconv2_1_bias'] = tf.Variable(self.sess.run('deconv2_1_bias:0'),dtype = tf.float32, name='deconv2_1_bias')
+            pretrained_weights['deconv2_2_weight'] = tf.Variable(self.sess.run('deconv2_2_weight:0'),dtype = tf.float32, name='deconv2_2_weight')
+            pretrained_weights['deconv2_2_bias'] = tf.Variable(self.sess.run('deconv2_2_bias:0'),dtype = tf.float32, name='deconv2_2_bias')
+            pretrained_weights['deconv3_1_weight'] = tf.Variable(self.sess.run('deconv3_1_weight:0'),dtype = tf.float32, name='deconv3_1_weight')
+            pretrained_weights['deconv3_1_bias'] = tf.Variable(self.sess.run('deconv3_1_bias:0'),dtype = tf.float32, name='deconv3_1_bias')
+            pretrained_weights['deconv3_2_weight'] = tf.Variable(self.sess.run('deconv3_2_weight:0'),dtype = tf.float32, name='deconv3_2_weight')
+            pretrained_weights['deconv3_2_bias'] = tf.Variable(self.sess.run('deconv3_2_bias:0'),dtype = tf.float32, name='deconv3_2_bias')
+            pretrained_weights['deconv4_1_weight'] = tf.Variable(self.sess.run('deconv4_1_weight:0'),dtype = tf.float32, name='deconv4_1_weight')
+            pretrained_weights['deconv4_1_bias'] = tf.Variable(self.sess.run('deconv4_1_bias:0'),dtype = tf.float32, name='deconv4_1_bias')
+            pretrained_weights['deconv4_2_weight'] = tf.Variable(self.sess.run('deconv4_2_weight:0'),dtype = tf.float32, name='deconv4_2_weight')
+            pretrained_weights['deconv4_2_bias'] = tf.Variable(self.sess.run('deconv4_2_bias:0'),dtype = tf.float32, name='deconv4_2_bias')
+            pretrained_weights['deconv5_weight'] = tf.Variable(self.sess.run('deconv5_weight:0'),dtype = tf.float32, name='deconv5_weight')
+            pretrained_weights['deconv5_bias'] = tf.Variable(self.sess.run('deconv5_bias:0'),dtype = tf.float32, name='deconv5_bias')
+            self.pretrained_weights = pretrained_weights
 
-        vanilla_weights = {}
-        vanilla_weights['deconv2_1_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv2_1_features, 1], stddev=0.1, dtype=tf.float32))
-        vanilla_weights['deconv2_1_bias'] = tf.Variable(tf.zeros([self.deconv2_1_features], dtype=tf.float32))
-        vanilla_weights['deconv2_2_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv2_2_features, self.deconv2_1_features], stddev=0.1, dtype=tf.float32))
-        vanilla_weights['deconv2_2_bias'] = tf.Variable(tf.zeros([self.deconv2_2_features], dtype=tf.float32))
-        vanilla_weights['deconv3_1_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv3_1_features, self.deconv2_2_features], stddev=0.1, dtype=tf.float32))
-        vanilla_weights['deconv3_1_bias'] = tf.Variable(tf.zeros([self.deconv3_1_features], dtype=tf.float32))
-        vanilla_weights['deconv3_2_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv3_2_features, self.deconv3_1_features], stddev=0.1, dtype=tf.float32))
-        vanilla_weights['deconv3_2_bias'] = tf.Variable(tf.zeros([self.deconv3_2_features], dtype=tf.float32))
-        vanilla_weights['deconv4_1_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv4_1_features, self.deconv3_2_features], stddev=0.1, dtype=tf.float32))
-        vanilla_weights['deconv4_1_bias'] = tf.Variable(tf.zeros([self.deconv4_1_features], dtype=tf.float32))
-        vanilla_weights['deconv4_2_weight'] = tf.Variable(tf.truncated_normal([8, 8, self.deconv4_2_features, self.deconv4_1_features], stddev=0.1, dtype=tf.float32))
-        vanilla_weights['deconv4_2_bias'] = tf.Variable(tf.zeros([self.deconv4_2_features], dtype=tf.float32))
-        vanilla_weights['deconv5_weight'] = tf.Variable(tf.truncated_normal([8, 8, 1, self.deconv4_2_features], stddev=0.1, dtype=tf.float32))
-        vanilla_weights['deconv5_bias'] = tf.Variable(tf.zeros([1], dtype=tf.float32))
-        self.vanilla_weights = vanilla_weights
+        with tf.variable_scope("vanilla", reuse=True):
+            vanilla_weights = {}
+            pretrained_weights['P_W1'] = tf.Variable(tf.truncated_normal([3362, 75], stddev=0.1, dtype=tf.float32), name = 'P_W1')
+            pretrained_weights['P_b1'] = tf.Variable(tf.zeros([75], dtype=tf.float32), name = 'P_b1')
+            vanilla_weights['deconv2_1_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv2_1_features, 1], stddev=0.1, dtype=tf.float32), name='deconv2_1_weight')
+            vanilla_weights['deconv2_1_bias'] = tf.Variable(tf.zeros([self.deconv2_1_features], dtype=tf.float32), name='deconv2_1_bias')
+            vanilla_weights['deconv2_2_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv2_2_features, self.deconv2_1_features], stddev=0.1, dtype=tf.float32), name='deconv2_2_weight')
+            vanilla_weights['deconv2_2_bias'] = tf.Variable(tf.zeros([self.deconv2_2_features], dtype=tf.float32), name='deconv2_2_bias')
+            vanilla_weights['deconv3_1_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv3_1_features, self.deconv2_2_features], stddev=0.1, dtype=tf.float32), name='deconv3_1_weight')
+            vanilla_weights['deconv3_1_bias'] = tf.Variable(tf.zeros([self.deconv3_1_features], dtype=tf.float32), name='deconv3_1_bias')
+            vanilla_weights['deconv3_2_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv3_2_features, self.deconv3_1_features], stddev=0.1, dtype=tf.float32), name='deconv3_2_weight')
+            vanilla_weights['deconv3_2_bias'] = tf.Variable(tf.zeros([self.deconv3_2_features], dtype=tf.float32), name='deconv3_2_bias')
+            vanilla_weights['deconv4_1_weight'] = tf.Variable(tf.truncated_normal([4, 4, self.deconv4_1_features, self.deconv3_2_features], stddev=0.1, dtype=tf.float32), name='deconv4_1_weight')
+            vanilla_weights['deconv4_1_bias'] = tf.Variable(tf.zeros([self.deconv4_1_features], dtype=tf.float32), name='deconv4_1_bias')
+            vanilla_weights['deconv4_2_weight'] = tf.Variable(tf.truncated_normal([8, 8, self.deconv4_2_features, self.deconv4_1_features], stddev=0.1, dtype=tf.float32), name='deconv4_2_weight')
+            vanilla_weights['deconv4_2_bias'] = tf.Variable(tf.zeros([self.deconv4_2_features], dtype=tf.float32), name='deconv4_2_bias')
+            vanilla_weights['deconv5_weight'] = tf.Variable(tf.truncated_normal([8, 8, 1, self.deconv4_2_features], stddev=0.1, dtype=tf.float32), name='deconv5_weight')
+            vanilla_weights['deconv5_bias'] = tf.Variable(tf.zeros([1], dtype=tf.float32), name='deconv5_bias')
+            self.vanilla_weights = vanilla_weights
 
         P_output = self.P(self.F_input, self.pretrained_weights, self.vanilla_weights)
         self.phi_true = tf.transpose(tf.reshape(P_output,[self.batch_size, self.nn]))
@@ -138,8 +142,16 @@ class TO_generator():
         self.learning_rate=tf.train.exponential_decay(self.starter_learning_rate, self.global_step,1000,0.98,staircase=True)
         self.y_output=tf.placeholder(tf.float32, shape=([self.nn, self.batch_size]))
         self.recon_loss = tf.reduce_sum((self.phi_true-self.y_output)**2)/self.batch_size
-        self.solver = tf.train.AdamOptimizer(self.learning_rate).minimize(self.recon_loss, self.global_step)
+        # self.solver = tf.train.AdamOptimizer(self.learning_rate).minimize(self.recon_loss, self.global_step)
+        optimizer = tf.train.AdamOptimizer(self.learning_rate)
+        vars = [pretrained_weights['P_W1'], pretrained_weights['P_b1'],
+                pretrained_weights['deconv2_1_weight'], pretrained_weights['deconv2_1_bias'],
+                pretrained_weights['deconv2_2_weight'], pretrained_weights['deconv2_2_bias'],
+                ]
+        grads_g = optimizer.compute_gradients(self.recon_loss, var_list=vars)
+        self.solver = optimizer.apply_gradients(grads_g)
         self.sess.run(tf.global_variables_initializer())
+
 
     def load_initial_points(self):
         # pre-sampling the loading condition offline
