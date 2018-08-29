@@ -299,8 +299,8 @@ while len(index_ind) <= terminate_step:
 
 
     ########### Change for each run goes here
-    Save_folder = 'Trial_100/'
-    trial_num = 100 #can only contain numbers
+    Save_folder = 'Trial_102/'
+    trial_num = 102 #can only contain numbers
     ###########
 
 
