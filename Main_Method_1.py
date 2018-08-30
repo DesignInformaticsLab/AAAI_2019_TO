@@ -139,7 +139,22 @@ starter_learning_rate=0.005
 learning_rate=tf.train.exponential_decay(starter_learning_rate,global_step,1000,0.98,staircase=True)
 y_output=tf.placeholder(tf.float32, shape=([nn, batch_size]))
 recon_loss = tf.reduce_sum((phi_true-y_output)**2)/batch_size
-solver = tf.train.AdamOptimizer(learning_rate).minimize(recon_loss,global_step)
+if 0:
+    solver = tf.train.AdamOptimizer(learning_rate).minimize(recon_loss,global_step)
+else:
+    optimizer = tf.train.AdamOptimizer(learning_rate)
+    vars = [P_W1, P_b1,
+            deconv2_1_weight, deconv2_1_bias,
+            deconv2_2_weight, deconv2_2_bias,
+            deconv3_1_weight, deconv3_1_bias,
+            deconv3_2_weight, deconv3_2_bias,
+            deconv4_1_weight, deconv4_1_bias,
+            deconv4_2_weight, deconv4_2_bias,
+#            deconv5_weight, deconv5_bias,
+            ]
+    grads_g = optimizer.compute_gradients(recon_loss, var_list=vars)
+    solver = optimizer.apply_gradients(grads_g,global_step)
+
 sess.run(tf.global_variables_initializer())
 # generating initial points
 directory_data='experiment_data'

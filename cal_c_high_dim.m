@@ -25,7 +25,11 @@ c_our_final=zeros(batch_size,1);
 mu_store=zeros(batch_size,1);
 rho_store=zeros(batch_size,4800);
 
-for iii = 1:1:batch_size
+
+delete(gcp('nocreate'));
+N = maxNumCompThreads;
+parpool(N-1)
+parfor iii = 1:1:batch_size
     
 count=0;
 force=-1;
@@ -225,3 +229,4 @@ save(sprintf('experiment_result/c_our_final.mat'),'c_our_final');
 [B,I]=sort(mu_store,'descend');
 add_point_index=random_candidate(I(1))-1; % matlab to python
 save(sprintf('experiment_result/add_point_index.mat'),'add_point_index');
+

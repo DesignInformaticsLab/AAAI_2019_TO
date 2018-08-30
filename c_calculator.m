@@ -27,7 +27,10 @@ c_our_final=zeros(batch_size,1);
 mu_store=zeros(batch_size,1);
 rho_store=zeros(batch_size,4800);
 
-for iii = 1:1:batch_size
+N = maxNumCompThreads
+fprintf('using %d cores in parrallel\n', N-1)
+parpool(N-1)
+parfor iii = 1:1:batch_size
     
     count=0;
     force=-1;
