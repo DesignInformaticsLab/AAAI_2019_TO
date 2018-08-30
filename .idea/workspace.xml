@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b555f7ea-4a40-47c6-887f-ca7d5f62ffbf" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/Main_Method_1_BN.py" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/Main_Method_1.py" afterPath="$PROJECT_DIR$/Main_Method_1.py" />
+      <change beforePath="$PROJECT_DIR$/Main_Method_1_BN.py" afterPath="$PROJECT_DIR$/Main_Method_1_BN.py" />
       <change beforePath="$PROJECT_DIR$/experiment_result/add_point_index.mat" afterPath="$PROJECT_DIR$/experiment_result/add_point_index.mat" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -38,10 +39,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Main_Method_1_Hope.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Main_Method_1_Hope.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Main_Method_1_Hope.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="256">
+            <state relative-caret-position="2574">
               <caret line="149" column="17" lean-forward="false" selection-start-line="149" selection-start-column="17" selection-end-line="149" selection-end-column="17" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -50,11 +51,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Main_Method_1.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Main_Method_1_BN.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Main_Method_1_BN.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="268">
+              <caret line="271" column="36" lean-forward="true" selection-start-line="271" selection-start-column="36" selection-end-line="271" selection-end-column="36" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Main_Method_1.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main_Method_1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+            <state relative-caret-position="468">
+              <caret line="290" column="8" lean-forward="false" selection-start-line="290" selection-start-column="8" selection-end-line="290" selection-end-column="8" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -105,7 +118,7 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
+            <state relative-caret-position="252">
               <caret line="20" column="39" lean-forward="false" selection-start-line="20" selection-start-column="39" selection-end-line="20" selection-end-column="39" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -164,8 +177,9 @@
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch.py" />
         <option value="$PROJECT_DIR$/Main_Method_1" />
-        <option value="$PROJECT_DIR$/Main_Method_1.py" />
         <option value="$PROJECT_DIR$/Main_Method_1_Hope.py" />
+        <option value="$PROJECT_DIR$/Main_Method_1_BN.py" />
+        <option value="$PROJECT_DIR$/Main_Method_1.py" />
       </list>
     </option>
   </component>
@@ -190,6 +204,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -201,8 +217,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -229,7 +243,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Main_Method_1_Hope">
+  <component name="RunManager" selected="Python.Main_Method_1_BN">
     <configuration name="Main_Method_1" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -243,6 +257,24 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="AAAI 2019 code" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main_Method_1.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="Main_Method_1_BN" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AAAI 2019 code" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main_Method_1_BN.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -431,16 +463,18 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
-    <list size="3">
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Python.main_1D" />
       <item index="1" class="java.lang.String" itemvalue="Python.Main_Method_1" />
       <item index="2" class="java.lang.String" itemvalue="Python.Main_Method_1_Hope" />
+      <item index="3" class="java.lang.String" itemvalue="Python.Main_Method_1_BN" />
     </list>
     <recent_temporary>
-      <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Python.Main_Method_1_Hope" />
-        <item index="1" class="java.lang.String" itemvalue="Python.Main_Method_1" />
-        <item index="2" class="java.lang.String" itemvalue="Python.main_1D" />
+      <list size="4">
+        <item index="0" class="java.lang.String" itemvalue="Python.Main_Method_1_BN" />
+        <item index="1" class="java.lang.String" itemvalue="Python.Main_Method_1_Hope" />
+        <item index="2" class="java.lang.String" itemvalue="Python.Main_Method_1" />
+        <item index="3" class="java.lang.String" itemvalue="Python.main_1D" />
       </list>
     </recent_temporary>
   </component>
@@ -477,13 +511,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="64" y="-4" width="1857" height="1085" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1420765" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1420765" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29746836" sideWeight="0.27978143" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31118143" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29746836" sideWeight="0.7202186" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24050634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24578059" sideWeight="0.29180327" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.6023207" sideWeight="0.71147543" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24578059" sideWeight="0.7081967" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24050634" sideWeight="0.4978142" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.14662448" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.38080168" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -659,6 +694,26 @@ grad_b2 = optimizer.compute_gradients(self.recon_loss, tf.get_collection(tf.Grap
     </expressions>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="20" column="39" lean-forward="false" selection-start-line="20" selection-start-column="39" selection-end-line="20" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Main_Method_1_Hope.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2682">
+          <caret line="149" column="17" lean-forward="false" selection-start-line="149" selection-start-column="17" selection-end-line="149" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cal_c_1D.m">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="54">
@@ -941,7 +996,7 @@ grad_b2 = optimizer.compute_gradients(self.recon_loss, tf.get_collection(tf.Grap
     <entry file="file://$PROJECT_DIR$/model_save/checkpoint" />
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
+        <state relative-caret-position="252">
           <caret line="20" column="39" lean-forward="false" selection-start-line="20" selection-start-column="39" selection-end-line="20" selection-end-column="39" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -1005,20 +1060,30 @@ grad_b2 = optimizer.compute_gradients(self.recon_loss, tf.get_collection(tf.Grap
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Main_Method_1.py">
+    <entry file="file://$PROJECT_DIR$/Main_Method_1_Hope.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+        <state relative-caret-position="2574">
+          <caret line="149" column="17" lean-forward="false" selection-start-line="149" selection-start-column="17" selection-end-line="149" selection-end-column="17" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Main_Method_1_Hope.py">
+    <entry file="file://$PROJECT_DIR$/Main_Method_1_BN.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="256">
-          <caret line="149" column="17" lean-forward="false" selection-start-line="149" selection-start-column="17" selection-end-line="149" selection-end-column="17" />
+        <state relative-caret-position="268">
+          <caret line="271" column="36" lean-forward="true" selection-start-line="271" selection-start-column="36" selection-end-line="271" selection-end-column="36" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Main_Method_1.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="290" column="8" lean-forward="false" selection-start-line="290" selection-start-column="8" selection-end-line="290" selection-end-column="8" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

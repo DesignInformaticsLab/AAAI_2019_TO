@@ -260,8 +260,8 @@ error_progress = []
 final_error=float('inf')
 terminate_criteria=10
 terminate_step = 451
-starting_loss = 300
-decay_rate = 0.6
+starting_loss = 500
+decay_rate = 0.95
 # one-shot algorithm
 while len(index_ind) <= terminate_step:
     print("requirement doesn't match, current final_error={}, keep sampling".format(final_error))
@@ -330,7 +330,7 @@ while len(index_ind) <= terminate_step:
 
 			print('iteration:{}, learning rate: {}, recon_loss:{}, testing_recon_loss: {}, number of data used is:{}'.format(it, sess.run(learning_rate), error, final_error, len(index_ind)))
         #if error <= 1 : # try exponential decay
-        if error <= decay_loss or error<=1e-4:
+        if error <= decay_loss or error<=1e-2:
             print('loss threshold is: {}'.format(decay_loss))
             if not os.path.exists(directory_model):
                 os.makedirs(directory_model)

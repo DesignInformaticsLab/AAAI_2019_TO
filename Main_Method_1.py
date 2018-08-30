@@ -288,7 +288,7 @@ while len(index_ind) <= terminate_step:
     ratio=testing_num/batch_size
     final_error=0
     for it in range(ratio):
-        _,final_error_temp=sess.run([solver, recon_loss],feed_dict={y_output:Y_test[it%ratio*batch_size:it%ratio*batch_size+batch_size].T,
+        final_error_temp=sess.run(recon_loss,feed_dict={y_output:Y_test[it%ratio*batch_size:it%ratio*batch_size+batch_size].T,
                                                                     F_input:test_load[it%ratio*batch_size:it%ratio*batch_size+batch_size]})
         final_error=final_error + final_error_temp
     final_error=final_error/testing_num * batch_size
