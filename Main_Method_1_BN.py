@@ -5,11 +5,88 @@ import scipy.io as sio
 import os
 import random
 import matlab.engine
+eng = matlab.engine.start_matlab()
 
 def xavier_init(size):
     in_dim = size[0]
     xavier_stddev = 1. / tf.sqrt(in_dim / 2.)
     return tf.random_normal(shape=size, stddev=xavier_stddev)
+
+def P_bn(z, is_training):
+
+    h1 = tf.matmul(z, P_W1) + P_b1
+    h1 = tf.contrib.layers.batch_norm(h1,
+                                      center=True, scale=True,
+                                      is_training=is_training,
+                                      scope='bn_1')
+    h1 = tf.nn.relu(h1)
+
+    h2_1 = tf.add(tf.nn.conv2d_transpose(tf.reshape(h1, [batch_size, width / 8, height / 8, 1]),
+                                                    deconv2_1_weight, strides=[1, 1, 1, 1], padding='SAME',
+                                                    output_shape=[batch_size, width / 8, height / 8,
+                                                                  deconv2_1_features]), deconv2_1_bias)
+    h2_1 = tf.contrib.layers.batch_norm(h2_1,
+                                      center=True, scale=True,
+                                      is_training=is_training,
+                                      scope='bn_21')
+    h2_1 = tf.nn.relu(h2_1)
+
+    h2_2 = tf.add(tf.nn.conv2d_transpose(h2_1, deconv2_2_weight, strides=[1, 2, 2, 1], padding='SAME',
+                                                    output_shape=[batch_size, width / 4, height / 4,
+                                                                  deconv2_2_features]), deconv2_2_bias)
+    h2_2 = tf.contrib.layers.batch_norm(h2_2,
+                                      center=True, scale=True,
+                                      is_training=is_training,
+                                      scope='bn_22')
+    h2_2 = tf.nn.relu(h2_2)
+
+    h3_1 = tf.nn.relu(tf.add(tf.nn.conv2d_transpose(h2_2, deconv3_1_weight, strides=[1, 1, 1, 1], padding='SAME',
+                                                    output_shape=[batch_size, width / 4, height / 4,
+                                                                  deconv3_1_features]), deconv3_1_bias))
+    h3_1 = tf.contrib.layers.batch_norm(h3_1,
+                                      center=True, scale=True,
+                                      is_training=is_training,
+                                      scope='bn_31')
+    h3_1 = tf.nn.relu(h3_1)
+
+    h3_2 = tf.nn.relu(tf.add(tf.nn.conv2d_transpose(h3_1, deconv3_2_weight, strides=[1, 2, 2, 1], padding='SAME',
+                                                    output_shape=[batch_size, width / 2, height / 2,
+                                                                  deconv3_2_features]), deconv3_2_bias))
+    h3_2 = tf.contrib.layers.batch_norm(h3_2,
+                                      center=True, scale=True,
+                                      is_training=is_training,
+                                      scope='bn_32')
+    h3_2 = tf.nn.relu(h3_2)
+
+    h4_1 = tf.nn.relu(tf.add(tf.nn.conv2d_transpose(h3_2, deconv4_1_weight, strides=[1, 1, 1, 1], padding='SAME',
+                                                    output_shape=[batch_size, width / 2, height / 2,
+                                                                  deconv4_1_features]), deconv4_1_bias))
+    h4_1 = tf.contrib.layers.batch_norm(h4_1,
+                                      center=True, scale=True,
+                                      is_training=is_training,
+                                      scope='bn_41')
+    h4_1 = tf.nn.relu(h4_1)
+
+    h4_2 = tf.nn.relu(tf.add(tf.nn.conv2d_transpose(h4_1, deconv4_2_weight, strides=[1, 2, 2, 1], padding='SAME',
+                                                    output_shape=[batch_size, width / 1, height / 1,
+                                                                  deconv4_2_features]), deconv4_2_bias))
+    h4_2 = tf.contrib.layers.batch_norm(h4_2,
+                                      center=True, scale=True,
+                                      is_training=is_training,
+                                      scope='bn_42')
+    h4_2 = tf.nn.relu(h4_2)
+
+    h5 = (tf.add(tf.nn.conv2d_transpose(h4_2, deconv5_weight, strides=[1, 1, 1, 1], padding='SAME',
+                                        output_shape=[batch_size, width / 1, height / 1, 1]), deconv5_bias))
+    h5 = tf.contrib.layers.batch_norm(h5,
+                                      center=True, scale=True,
+                                      is_training=is_training,
+                                      scope='bn_5')
+    h5 = tf.nn.relu(h5)
+
+    prob = tf.nn.sigmoid(h5)
+
+    return prob
 
 
 def P(z):
@@ -71,7 +148,7 @@ saver.restore(sess, tf.train.latest_checkpoint('./Final_1D/'))
 graph = tf.get_default_graph()
 
 F_input = tf.placeholder(tf.float32, shape=([batch_size, z_dim]))
-
+is_training = tf.placeholder(tf.bool, shape=())
 
 P_W1_direction = sess.run('P_W1:0')
 
@@ -129,7 +206,7 @@ deconv5_bias = tf.Variable(sess.run('deconv5_bias:0'),dtype = tf.float32)
 # deconv5_bias = tf.Variable(tf.zeros([1], dtype=tf.float32))
 
 
-P_output = P(F_input)
+P_output = P_bn(F_input,is_training)
 
 phi_true = tf.transpose(tf.reshape(P_output,[batch_size,nn]))
 
@@ -139,7 +216,7 @@ starter_learning_rate=0.005
 learning_rate=tf.train.exponential_decay(starter_learning_rate,global_step,1000,0.98,staircase=True)
 y_output=tf.placeholder(tf.float32, shape=([nn, batch_size]))
 recon_loss = tf.reduce_sum((phi_true-y_output)**2)/batch_size
-if 0:
+if 1:
     solver = tf.train.AdamOptimizer(learning_rate).minimize(recon_loss,global_step)
 else:
     optimizer = tf.train.AdamOptimizer(learning_rate)
@@ -150,7 +227,7 @@ else:
             deconv3_2_weight, deconv3_2_bias,
             deconv4_1_weight, deconv4_1_bias,
             deconv4_2_weight, deconv4_2_bias,
-#            deconv5_weight, deconv5_bias,
+            deconv5_weight, deconv5_bias,
             ]
     grads_g = optimizer.compute_gradients(recon_loss, var_list=vars)
     solver = optimizer.apply_gradients(grads_g,global_step)
@@ -191,7 +268,7 @@ else:
     if not os.path.exists(directory_result):
         os.makedirs(directory_result)
     sio.savemat('{}/index_ind.mat'.format(directory_result),{'index_ind':index_ind})
-    eng = matlab.engine.start_matlab()
+    # eng = matlab.engine.start_matlab()
     eng.infill_high_dim(1,nargout=0)
 
 Y_test = sio.loadmat('{}/phi_true_test2.mat'.format(directory_data))['phi_true_test'] # prepared off-line
@@ -239,13 +316,15 @@ while len(index_ind) <= terminate_step:
     for it in range(100000):
         random_ind=np.random.choice(index_ind,batch_size,replace=False)
 
-        _,error=sess.run([solver, recon_loss],feed_dict={y_output:Y_train[random_ind].T,F_input:F_batch[random_ind]})
+        _,error=sess.run([solver, recon_loss],feed_dict={y_output:Y_train[random_ind].T,
+                                                         F_input:F_batch[random_ind],
+                                                         is_training: True})
         if len(index_ind)%100 == 0: # plot loss curve
             loss_list.append(error)
         if it%100 == 0:
             print('iteration:{}, recon_loss:{}, number of data used is:{}'.format(it,error,(len(index_ind))))
         #if error <= 1 : # try exponential decay
-        if error <= decay_loss or error<=1:
+        if error <= decay_loss or error<=1e-4:
             print('loss threshold is: {}'.format(decay_loss))
             if not os.path.exists(directory_model):
                 os.makedirs(directory_model)
@@ -289,7 +368,8 @@ while len(index_ind) <= terminate_step:
     final_error=0
     for it in range(ratio):
         _,final_error_temp=sess.run([solver, recon_loss],feed_dict={y_output:Y_test[it%ratio*batch_size:it%ratio*batch_size+batch_size].T,
-                                                                    F_input:test_load[it%ratio*batch_size:it%ratio*batch_size+batch_size]})
+                                                                    F_input:test_load[it%ratio*batch_size:it%ratio*batch_size+batch_size],
+                                                                    is_training: True})
         final_error=final_error + final_error_temp
     final_error=final_error/testing_num * batch_size
     print('average testing error is: {}'.format(final_error))
@@ -305,7 +385,8 @@ while len(index_ind) <= terminate_step:
     phi_store=[]
     ratio=testing_num/batch_size
     for it in range(ratio):
-        phi_update=sess.run(phi_true,feed_dict={F_input:F_batch_candidate[it%ratio*batch_size:it%ratio*batch_size+batch_size]})
+        phi_update=sess.run(phi_true,feed_dict={F_input:F_batch_candidate[it%ratio*batch_size:it%ratio*batch_size+batch_size],
+                                                is_training: False})
         phi_store.append(phi_update)
 
     if not os.path.exists(directory_result):
@@ -326,8 +407,8 @@ while len(index_ind) <= terminate_step:
     sio.savemat('{}/error_progress.mat'.format(Save_folder),{'error_progress':error_progress})
 
     for it in range(ratio):
-        phi_update_1 = sess.run(phi_true, feed_dict={
-            F_input: test_load[it % ratio * batch_size:it % ratio * batch_size + batch_size]})
+        phi_update_1 = sess.run(phi_true, feed_dict={F_input: test_load[it % ratio * batch_size:it % ratio * batch_size + batch_size],
+                                                     is_training: False})
         phi_store_1.append(phi_update_1)
 
     if not os.path.exists(directory_result):
@@ -336,9 +417,9 @@ while len(index_ind) <= terminate_step:
 
     sio.savemat('{}/phi_gen_test_input.mat'.format(Save_folder), {'phi_gen_test_input': phi_gen_1})
 
-    if len(index_ind) % 50 == 0:
+    if len(index_ind) % 50 == 0 and len(index_ind) != initial_num:
         sio.savemat('{}/phi_gen_test_input_{}.mat'.format(Save_folder,len(index_ind)), {'phi_gen_test_input': phi_gen_1})
-        eng = matlab.engine.start_matlab()
+        # eng = matlab.engine.start_matlab()
         eng.c_calculator(('{}/phi_gen_test_input_{}.mat'.format(Save_folder,str(len(index_ind)))),trial_num,len(index_ind),nargout=0)
 
     if Prepared_training_sample==False:
@@ -346,11 +427,11 @@ while len(index_ind) <= terminate_step:
 
     # solve the worst one
     if Prepared_training_sample == False:
-        eng = matlab.engine.start_matlab()
+        # eng = matlab.engine.start_matlab()
         eng.infill_high_dim(0,nargout=0)
 
     # evaluate the random samples and pick the worst one
-    eng = matlab.engine.start_matlab()
+    # eng = matlab.engine.start_matlab()
     eng.cal_c_high_dim(nargout=0)
 
 
