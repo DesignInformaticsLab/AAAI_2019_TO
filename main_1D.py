@@ -139,8 +139,8 @@ F_batch= np.zeros([100, z_dim])
 for i in range(100):
     Fx = force * np.sin(theta[i])
     Fy = force * np.cos(theta[i])
-    F_batch[i,2*((nely+1)*40+19+1)-1]=Fy
-    F_batch[i,2*((nely+1)*40+19+1)-2]=Fx
+    F_batch[i,2*((nely+1)*40+20+1)-1]=Fy
+    F_batch[i,2*((nely+1)*40+20+1)-2]=Fx
     #F_batch[i,:]=theta[i]
 
 budget=0
@@ -158,7 +158,7 @@ while len(index_ind) <= 15:
         pass
 
     Y_train = sio.loadmat('{}/phi_true_1D.mat'.format(directory_data))['phi_true']
-
+    saver = tf.train.Saver()
     final_error=float('inf')
     error = float('inf')
 
@@ -173,7 +173,6 @@ while len(index_ind) <= 15:
         if error <= 0.05:
             if not os.path.exists(directory_model):
                 os.makedirs(directory_model)
-            saver=tf.train.Saver()
             saver.save(sess, '{}/model_1D_sample_{}'.format(directory_model,len(index_ind)))
             print('converges, saving the model.....')
             print('number of data used is:{}'.format(len(index_ind)))
@@ -200,8 +199,8 @@ while len(index_ind) <= 15:
         Fy = force * np.cos(theta[i])
 
         # up-right corner
-        F_batch_test[i, 0] = Fx
-        F_batch_test[i, 1] = Fy
+        F_batch_test[i, 2 * ((nely + 1) * 40 + 20 + 1) - 1] = Fy
+        F_batch_test[i, 2 * ((nely + 1) * 40 + 20 + 1) - 2] = Fx
         #F_batch_test[i,:]=theta[i]
 
     # evaluate all points (total 100)
@@ -220,9 +219,6 @@ while len(index_ind) <= 15:
 
     eng = matlab.engine.start_matlab()
     eng.cal_c_1D(nargout=0)
-
-
-
 
 
 
